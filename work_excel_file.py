@@ -30,7 +30,7 @@ def get_link_market(last_row: int, file_path):
         counter += 1
 
 
-def find_last_row_excel(file_path):
+async def find_last_row_excel(file_path):
     wb = excel.load_workbook(file_path, read_only=False, keep_vba=False, data_only=False, keep_links=True)
     wb.active = 0
     sheet = wb.active
