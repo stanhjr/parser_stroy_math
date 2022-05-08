@@ -35,6 +35,9 @@ def get_price(page_text, liter_key):
     if liter_key == 'F':
         elem = soup.find('span', class_='autocalc-product-price')
 
+    if liter_key == 'N':
+        elem = soup.find('span', class_='woocommerce-Price-amount amount')
+
     if elem:
         return elem.text
 
@@ -47,6 +50,8 @@ def format_text(text):
     if text[-1] == '.':
         text = text[:len(text) - 1]
     text = text.replace('.', ',')
+    text = text.replace('\n', '')
+    text = text.replace('\t', '')
     return text
 
 

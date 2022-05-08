@@ -1,11 +1,9 @@
-import datetime
+import asyncio
 import os
 import urllib
 
 from aiogram import Bot, types
 from aiogram import Dispatcher
-from aiogram.dispatcher import FSMContext, filters
-from aiogram.types import ContentType
 from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from deploy.config import TOKEN

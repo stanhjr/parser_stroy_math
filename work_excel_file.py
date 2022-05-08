@@ -1,22 +1,14 @@
 import os
 import shutil
-import time
 from openpyxl.reader import excel
 
 
-# shutil.copy2('file/1.xlsx', 'file/2.xlsx')
-#
-# wb = excel.load_workbook('file/1.xlsx', read_only=False, keep_vba=False, data_only=False, keep_links=True)
-# wb2 = excel.load_workbook('file/2.xlsx', read_only=False, keep_vba=False, data_only=False, keep_links=True)
-# wb.active = 0
-# sheet = wb.active
-
-
 def set_price_to_book(address, price, file_path):
+    wb = excel.load_workbook(file_path, read_only=False, keep_vba=False, data_only=False, keep_links=True)
+    wb = excel.load_workbook(file_path, read_only=False, keep_vba=False, data_only=False, keep_links=True)
+    wb.active = 0
+    sheet = wb.active
     try:
-        wb = excel.load_workbook(file_path, read_only=False, keep_vba=False, data_only=False, keep_links=True)
-        wb.active = 0
-        sheet = wb.active
         sheet[address] = price
         wb.save(file_path)
         return True
@@ -25,6 +17,7 @@ def set_price_to_book(address, price, file_path):
 
 
 def get_link_market(last_row: int, file_path):
+    shutil.copy2('file/1.xlsx', 'file/2.xlsx')
     wb = excel.load_workbook(file_path, read_only=False, keep_vba=False, data_only=False, keep_links=True)
     wb.active = 0
     sheet = wb.active
