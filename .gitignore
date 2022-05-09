@@ -8,9 +8,6 @@ __pycache__/
 .idea
 # Distribution / packaging
 .Python
-deploy
-file/
-deploy/
 deploy/config.py
 config.py
 build/

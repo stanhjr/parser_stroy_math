@@ -47,11 +47,11 @@ async def get_page_data(session, url, cell, key_selector, copy_file):
 
                     html = await response.text()
                     buffer = io.BufferedReader(io.BytesIO(html.encode("utf-8")))
-                    textWrapper = io.TextIOWrapper(buffer)
-                    response_text = textWrapper.read()
+                    text_wrapper = io.TextIOWrapper(buffer)
+                    response_text = text_wrapper.read()
 
                 if response.status == 404:
-                    set_price_to_book(address=cell, price='http code 404', file_path=copy_file)
+                    set_price_to_book(address=cell, price='Страница не найдена', file_path=copy_file)
                     return
 
                 if response is None:
@@ -119,10 +119,9 @@ async def all_parsing(original_file, copy_file):
     number_of_iterations, last_row = await find_last_row_excel(file_path=original_file)
     all_data = get_all_link_market(last_row=last_row, file_path=original_file)
     first_row_row_in_one_parse = 0
-    last_row_in_one_parse = 80  # 96
+    last_row_in_one_parse = 80
     number_of_run = number_of_iterations // last_row_in_one_parse
-    print(number_of_iterations)
-    print(number_of_iterations % number_of_run != 0)
+
     if number_of_iterations % number_of_run != 0:
         number_of_run += 1
 
@@ -132,7 +131,7 @@ async def all_parsing(original_file, copy_file):
                                                                          last_row=last_row_in_one_parse,
                                                                          all_data=all_data)
         time.sleep(3)
-        first_row_row_in_one_parse += 80 # 96
-        last_row_in_one_parse += 80 # 96
+        first_row_row_in_one_parse += 80
+        last_row_in_one_parse += 80
 
     return copy_file
