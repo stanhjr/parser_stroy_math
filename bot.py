@@ -30,7 +30,6 @@ async def scan_message(msg: types.Message):
     elif os.path.exists(f'{user_path}/{file_name}'):
         await bot.send_message(msg.from_user.id, "Я уже работаю с этим файлом")
     else:
-
         try:
             user_path = f'file/{msg.from_user.id}'
             copy_file_name = 'copy' + file_name
@@ -43,7 +42,8 @@ async def scan_message(msg: types.Message):
             copy_file = await all_parsing(original_file_path[0], copy_file_path[0])
             await bot.send_document(msg.from_user.id, open(copy_file, 'rb'))
         except Exception as e:
-            print(e)
+            text = "Что то пошло не так\nОшибка\n" + str(e)
+            await bot.send_message(msg.from_user.id, text)
         finally:
             os.remove(original_file_path[0])
             os.remove(copy_file_path[0])

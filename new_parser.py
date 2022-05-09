@@ -58,6 +58,7 @@ async def get_page_data(session, url, cell, key_selector, copy_file):
                     set_price_to_book(address=cell, price='Товар ожидается', file_path=copy_file)
                     counter_none += 1
                     return
+
                 if response_text:
                     text = get_price(response_text, key_selector)
 
@@ -88,12 +89,15 @@ async def get_page_data(session, url, cell, key_selector, copy_file):
             break
 
         except asyncio.TimeoutError as e:
-            print(e, cell, counter_except)
             counter_except += 1
             await asyncio.sleep(4)
             if counter_except == 3:
                 set_price_to_book(address=cell, price='Сервер недоступен', file_path=copy_file)
             continue
+        except Exception as e:
+            print(e)
+            set_price_to_book(address=cell, price='Некорректная ссылка', file_path=copy_file)
+            break
 
 
 async def parser(copy_file, first_row, last_row, all_data):
