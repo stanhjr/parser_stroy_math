@@ -38,8 +38,10 @@ async def scan_message(msg: types.Message):
                                                             f'{user_path}/{file_name}')
             copy_file_path = urllib.request.urlretrieve(f'https://api.telegram.org/file/bot{TOKEN}/{fi}',
                                                         f'{user_path}/{copy_file_name}')
-            await bot.send_message(msg.from_user.id, 'Начинаю парсинг')
-            copy_file = await all_parsing(original_file_path[0], copy_file_path[0])
+            msg_answer = await bot.send_message(msg.from_user.id, 'Начинаю парсинг')
+            chat_id = msg.chat.id
+            msg_answer_id = msg_answer.message_id
+            copy_file = await all_parsing(original_file_path[0], copy_file_path[0], chat_id, msg_answer_id)
             await bot.send_document(msg.from_user.id, open(copy_file, 'rb'))
         except Exception as e:
             text = "Что то пошло не так\nОшибка\n" + str(e)

@@ -1,12 +1,11 @@
 import time
 import io
 from fake_useragent import UserAgent
-import requests
 from bs4 import BeautifulSoup
 import asyncio
 import aiohttp
-from tools.tools import SELECTOR_DICT, get_price, format_text
-from work_excel_file import get_link_market, find_last_row_excel, set_price_to_book, get_all_link_market
+from tools.tools import SELECTOR_DICT, get_price, format_text, edit_message
+from work_excel_file import find_last_row_excel, set_price_to_book, get_all_link_market
 import encodings
 
 encodings.aliases.aliases['cp_1251'] = 'cp1251'
@@ -14,7 +13,7 @@ encodings.aliases.aliases['cp_1251'] = 'cp1251'
 sema = asyncio.BoundedSemaphore(5)
 
 
-async def get_page_data(session, url, cell, key_selector, copy_file):
+async def get_page_data(session, url, cell, key_selector, copy_file, chat_id, msg_id):
     ua = UserAgent()
     try:
         print(cell)
@@ -37,7 +36,8 @@ async def get_page_data(session, url, cell, key_selector, copy_file):
         try:
             async with session.get(url=url, headers=headers, allow_redirects=True, timeout=30) as response:
 
-                print('cell', cell, proxy)
+
+
 
                 selector = SELECTOR_DICT.get(key_selector)
 
@@ -100,7 +100,7 @@ async def get_page_data(session, url, cell, key_selector, copy_file):
             break
 
 
-async def parser(copy_file, first_row, last_row, all_data):
+async def parser(copy_file, first_row, last_row, all_data, chat_id, msg_id):
     connector = aiohttp.TCPConnector(limit=5)
 
     try:
@@ -108,9 +108,10 @@ async def parser(copy_file, first_row, last_row, all_data):
             tasks = []
 
             for url, cell, key_selector in all_data[first_row:last_row]:
+
                 if url is None:
                     continue
-                task = asyncio.create_task(get_page_data(session, url, cell, key_selector, copy_file))
+                task = asyncio.create_task(get_page_data(session, url, cell, key_selector, copy_file, chat_id, msg_id))
                 tasks.append(task)
 
             await asyncio.gather(*tasks)
@@ -119,7 +120,7 @@ async def parser(copy_file, first_row, last_row, all_data):
         print(e)
 
 
-async def all_parsing(original_file, copy_file):
+async def all_parsing(original_file, copy_file, chat_id, msg_id):
     number_of_iterations, last_row = await find_last_row_excel(file_path=original_file)
     all_data = get_all_link_market(last_row=last_row, file_path=original_file)
     first_row_row_in_one_parse = 0
@@ -130,10 +131,16 @@ async def all_parsing(original_file, copy_file):
         number_of_run += 1
 
     for i in range(number_of_run):
+        try:
+            await edit_message(chat_id=chat_id, msg_id=msg_id, text=f"Парсим ряд {first_row_row_in_one_parse // 13}")
+        except:
+            pass
         first_row_row_in_one_parse, last_row_in_one_parse = await parser(copy_file=copy_file,
                                                                          first_row=first_row_row_in_one_parse,
                                                                          last_row=last_row_in_one_parse,
-                                                                         all_data=all_data)
+                                                                         all_data=all_data,
+                                                                         chat_id=chat_id,
+                                                                         msg_id=msg_id)
         time.sleep(3)
         first_row_row_in_one_parse += 80
         last_row_in_one_parse += 80

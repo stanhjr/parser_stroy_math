@@ -1,7 +1,9 @@
-import time
 
-import requests
+from aiogram import types
+
 from bs4 import BeautifulSoup
+
+
 
 SELECTOR_DICT = {
     'D': '#prices > div > div > div.card-body.py-3.px-4 > dl > dd:nth-child(2)',
@@ -55,7 +57,9 @@ def format_text(text):
     return text
 
 
-
+async def edit_message(chat_id, msg_id, text):
+    from bot import bot
+    await bot.edit_message_text(chat_id=chat_id, message_id=msg_id, text=text)
 
 
 
