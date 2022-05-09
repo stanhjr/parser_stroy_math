@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import asyncio
 import aiohttp
 from tools.tools import SELECTOR_DICT, get_price, format_text, edit_message
-from work_excel_file import find_last_row_excel, set_price_to_book, get_all_link_market
+from work_excel_file import find_last_row_excel, set_price_to_book, get_all_link_market, markup_excel_file
 import encodings
 
 encodings.aliases.aliases['cp_1251'] = 'cp1251'
@@ -13,10 +13,9 @@ encodings.aliases.aliases['cp_1251'] = 'cp1251'
 sema = asyncio.BoundedSemaphore(5)
 
 
-async def get_page_data(session, url, cell, key_selector, copy_file, chat_id, msg_id):
+async def get_page_data(session, url, cell, key_selector, copy_file):
     ua = UserAgent()
     try:
-        print(cell)
         headers = {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'User-Agent': ua.random,
@@ -28,10 +27,8 @@ async def get_page_data(session, url, cell, key_selector, copy_file, chat_id, ms
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'User-Agent': ua.random
         }
-    counter_404 = 0
     counter_except = 0
     counter_none = 0
-    final = False
     for proxy in range(4):
         try:
             async with session.get(url=url, headers=headers, allow_redirects=True, timeout=30) as response:
@@ -44,7 +41,6 @@ async def get_page_data(session, url, cell, key_selector, copy_file, chat_id, ms
                 if key_selector == 'I':
                     response_text = await response.text(encoding='ISO-8859-1')
                 else:
-
                     html = await response.text()
                     buffer = io.BufferedReader(io.BytesIO(html.encode("utf-8")))
                     text_wrapper = io.TextIOWrapper(buffer)
@@ -100,7 +96,7 @@ async def get_page_data(session, url, cell, key_selector, copy_file, chat_id, ms
             break
 
 
-async def parser(copy_file, first_row, last_row, all_data, chat_id, msg_id):
+async def parser(copy_file, first_row, last_row, all_data):
     connector = aiohttp.TCPConnector(limit=5)
 
     try:
@@ -111,7 +107,7 @@ async def parser(copy_file, first_row, last_row, all_data, chat_id, msg_id):
 
                 if url is None:
                     continue
-                task = asyncio.create_task(get_page_data(session, url, cell, key_selector, copy_file, chat_id, msg_id))
+                task = asyncio.create_task(get_page_data(session, url, cell, key_selector, copy_file))
                 tasks.append(task)
 
             await asyncio.gather(*tasks)
@@ -132,17 +128,17 @@ async def all_parsing(original_file, copy_file, chat_id, msg_id):
 
     for i in range(number_of_run):
         try:
-            await edit_message(chat_id=chat_id, msg_id=msg_id, text=f"Парсим ряд {first_row_row_in_one_parse // 13}")
+            text_for_user = f"Парсим ряд {first_row_row_in_one_parse // 13}\nВсего рядов {number_of_iterations // 13}"
+            await edit_message(chat_id=chat_id, msg_id=msg_id, text=text_for_user)
         except:
             pass
         first_row_row_in_one_parse, last_row_in_one_parse = await parser(copy_file=copy_file,
                                                                          first_row=first_row_row_in_one_parse,
                                                                          last_row=last_row_in_one_parse,
-                                                                         all_data=all_data,
-                                                                         chat_id=chat_id,
-                                                                         msg_id=msg_id)
+                                                                         all_data=all_data)
+
         time.sleep(3)
         first_row_row_in_one_parse += 80
         last_row_in_one_parse += 80
-
-    return copy_file
+    return markup_excel_file(copy_file, last_row)
+    # return copy_file

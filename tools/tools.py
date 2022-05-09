@@ -1,8 +1,4 @@
-
-from aiogram import types
-
 from bs4 import BeautifulSoup
-
 
 
 SELECTOR_DICT = {
@@ -28,8 +24,8 @@ def get_price(page_text, liter_key):
     if liter_key == 'D':
         elem = soup.find('span', class_='product-cat-price-current')
 
-    if liter_key == 'E':
-        elem = soup.find('span', class_='product-cat-price-current')
+    # if liter_key == 'E':
+    #     elem = soup.find('span', class_='product-cat-price-current')
 
     if liter_key == 'P':
         elem = soup.find('span', class_='catalog-detail-item-price')
