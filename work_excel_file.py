@@ -1,10 +1,9 @@
-import os
 import shutil
+
 from openpyxl.reader import excel
 
 
 def set_price_to_book(address, price, file_path):
-    wb = excel.load_workbook(file_path, read_only=False, keep_vba=False, data_only=False, keep_links=True)
     wb = excel.load_workbook(file_path, read_only=False, keep_vba=False, data_only=False, keep_links=True)
     wb.active = 0
     sheet = wb.active
@@ -16,18 +15,34 @@ def set_price_to_book(address, price, file_path):
         wb.save(file_path)
 
 
-def get_link_market(last_row: int, file_path):
+def get_link_market(last_row: int, file_path, first_row=None):
     shutil.copy2('file/1.xlsx', 'file/2.xlsx')
     wb = excel.load_workbook(file_path, read_only=False, keep_vba=False, data_only=False, keep_links=True)
     wb.active = 0
     sheet = wb.active
-
     counter = 2
     row_excel_book = 'DEFGHIJKLMNOP'
     while counter != last_row:
         for liter in row_excel_book:
             yield sheet[liter + str(counter)].value, sheet[liter + str(counter)].coordinate, sheet[liter + str(counter)].coordinate[0]
         counter += 1
+
+
+def get_all_link_market(last_row: int, file_path):
+    shutil.copy2('file/1.xlsx', 'file/2.xlsx')
+    wb = excel.load_workbook(file_path, read_only=False, keep_vba=False, data_only=False, keep_links=True)
+    wb.active = 0
+    sheet = wb.active
+    counter = 2
+    row_excel_book = 'DEFGHIJKLMNOP'
+    list_all_market = []
+
+    while counter != last_row:
+        for liter in row_excel_book:
+            one_market = sheet[liter + str(counter)].value, sheet[liter + str(counter)].coordinate, sheet[liter + str(counter)].coordinate[0]
+            list_all_market.append(one_market)
+        counter += 1
+    return list_all_market
 
 
 async def find_last_row_excel(file_path):
@@ -45,18 +60,4 @@ async def find_last_row_excel(file_path):
                     counter += 1
                 if counter == len(row_excel_book):
                     return int(sheet[liter + str(cell_number)].coordinate[1:]) * len(row_excel_book), int(sheet[liter + str(cell_number)].coordinate[1:])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
