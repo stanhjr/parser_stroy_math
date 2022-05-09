@@ -15,21 +15,8 @@ def set_price_to_book(address, price, file_path):
         wb.save(file_path)
 
 
-def get_link_market(last_row: int, file_path, first_row=None):
-    shutil.copy2('file/1.xlsx', 'file/2.xlsx')
-    wb = excel.load_workbook(file_path, read_only=False, keep_vba=False, data_only=False, keep_links=True)
-    wb.active = 0
-    sheet = wb.active
-    counter = 2
-    row_excel_book = 'DEFGHIJKLMNOP'
-    while counter != last_row:
-        for liter in row_excel_book:
-            yield sheet[liter + str(counter)].value, sheet[liter + str(counter)].coordinate, sheet[liter + str(counter)].coordinate[0]
-        counter += 1
-
-
 def get_all_link_market(last_row: int, file_path):
-    shutil.copy2('file/1.xlsx', 'file/2.xlsx')
+
     wb = excel.load_workbook(file_path, read_only=False, keep_vba=False, data_only=False, keep_links=True)
     wb.active = 0
     sheet = wb.active
