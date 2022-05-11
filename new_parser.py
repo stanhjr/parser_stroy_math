@@ -4,8 +4,11 @@ from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 import asyncio
 import aiohttp
+
+from epicenter import parser_epicenter
 from tools.tools import SELECTOR_DICT, get_price, format_text, edit_message
-from work_excel_file import find_last_row_excel, set_price_to_book, get_all_link_market, markup_excel_file
+from work_excel_file import find_last_row_excel, set_price_to_book, get_all_link_market, markup_excel_file, \
+    cut_paste_cell, cut_paste_atlant_shop
 import encodings
 
 encodings.aliases.aliases['cp_1251'] = 'cp1251'
@@ -20,22 +23,19 @@ async def get_page_data(session, url, cell, key_selector, copy_file):
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'User-Agent': ua.random,
             "Cookie": 'ymex=1962878606.yrts.1647518606#1962878606.yrtsi.1647518606; yandexuid=7334774781647518606; yuidss=7334774781647518606; i=QKr00Nm/0UePVn1eR2akaV7LfpJPzm2XBoDpHkoz7rvA4S8ceQ+5edhvhD536K6bWxGSx9btEMzxYa4C0yl4wxKZ5VM=; is_gdpr=0; is_gdpr_b=CLfGQxD7aA==; yabs-sid=2459537251652003522',
-
         }
+
     except IndexError:
         headers = {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'User-Agent': ua.random
         }
+
     counter_except = 0
     counter_none = 0
     for proxy in range(4):
         try:
             async with session.get(url=url, headers=headers, allow_redirects=True, timeout=30) as response:
-
-
-
-
                 selector = SELECTOR_DICT.get(key_selector)
 
                 if key_selector == 'I':
@@ -56,7 +56,7 @@ async def get_page_data(session, url, cell, key_selector, copy_file):
                     return
 
                 if response_text:
-                    text = get_price(response_text, key_selector)
+                    text = get_price(response_text, key_selector, cell, copy_file)
 
                     if not text:
                         soup = BeautifulSoup(response_text, "lxml")
@@ -69,6 +69,8 @@ async def get_page_data(session, url, cell, key_selector, copy_file):
                     if key_selector == 'I':
                         text = bytes(text, 'iso-8859-1').decode('utf-8')
                     text = format_text(text)
+                    if key_selector == 'F':
+                        print("new_price", text)
                     set_price_to_book(address=cell, price=text, file_path=copy_file)
                     return
 
@@ -107,6 +109,8 @@ async def parser(copy_file, first_row, last_row, all_data):
 
                 if url is None:
                     continue
+                if key_selector == 'K':
+                    continue
                 task = asyncio.create_task(get_page_data(session, url, cell, key_selector, copy_file))
                 tasks.append(task)
 
@@ -140,5 +144,11 @@ async def all_parsing(original_file, copy_file, chat_id, msg_id):
         time.sleep(3)
         first_row_row_in_one_parse += 80
         last_row_in_one_parse += 80
+    text_for_user = f"Теперь парсим эпицентр"
+    await edit_message(chat_id=chat_id, msg_id=msg_id, text=text_for_user)
+    await parser_epicenter(last_row=last_row, original_file=original_file, copy_file=copy_file)
+    text_for_user = f"Готово, всего рядов было обработано {number_of_iterations // 13}"
+    await edit_message(chat_id=chat_id, msg_id=msg_id, text=text_for_user)
+    cut_paste_cell(copy_file, last_row)
+    cut_paste_atlant_shop(copy_file, last_row)
     return markup_excel_file(copy_file, last_row)
-    # return copy_file

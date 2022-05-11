@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 
+from work_excel_file import set_price_to_book
 
 SELECTOR_DICT = {
     'D': '#prices > div > div > div.card-body.py-3.px-4 > dl > dd:nth-child(2)',
@@ -18,20 +19,30 @@ SELECTOR_DICT = {
 }
 
 
-def get_price(page_text, liter_key):
+def get_price(page_text, liter_key, cell, copy_file):
     elem = None
     soup = BeautifulSoup(page_text, "lxml")
     if liter_key == 'D':
         elem = soup.find('span', class_='product-cat-price-current')
 
-    # if liter_key == 'E':
-    #     elem = soup.find('span', class_='product-cat-price-current')
-
     if liter_key == 'P':
         elem = soup.find('span', class_='catalog-detail-item-price')
 
     if liter_key == 'F':
-        elem = soup.find('span', class_='autocalc-product-price')
+        selector = '#content > div > div.col-md-5.col-sm-7.col-xs-6.col-50 > div.area-1 > div.price-block > ul > li:nth-child(2) > h2 > span.autocalc-product-special'
+        elem = soup.select(selector=selector)
+        elem = elem[0]
+
+        old_price = soup.find('span', class_='old_price')
+
+        if old_price:
+            old_price = old_price.text
+            text = old_price.strip()
+            text = text.strip()
+            text = text.strip()
+            text = format_text(text)
+            cell = 'Q' + cell[1:]
+            set_price_to_book(address=cell, price=text, file_path=copy_file)
 
     if liter_key == 'N':
         elem = soup.find('span', class_='woocommerce-Price-amount amount')
@@ -50,6 +61,8 @@ def format_text(text):
     text = text.replace('.', ',')
     text = text.replace('\n', '')
     text = text.replace('\t', '')
+    text = text.replace(':', '')
+    text = text.replace(';', '')
     return text
 
 
