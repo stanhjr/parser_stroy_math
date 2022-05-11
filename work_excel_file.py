@@ -1,5 +1,6 @@
 from openpyxl.reader import excel
 from openpyxl.styles import PatternFill
+from openpyxl.styles import Font
 
 
 def set_price_to_book(address, price, file_path):
@@ -48,8 +49,6 @@ def get_all_link_market(last_row: int, file_path):
     return list_all_market
 
 
-
-
 async def find_last_row_excel(file_path):
     wb = excel.load_workbook(file_path, read_only=False, keep_vba=False, data_only=False, keep_links=True)
     wb.active = 0
@@ -65,6 +64,7 @@ async def find_last_row_excel(file_path):
                     counter += 1
                 if counter == len(row_excel_book):
                     return int(sheet[liter + str(cell_number)].coordinate[1:]) * len(row_excel_book), int(sheet[liter + str(cell_number)].coordinate[1:])
+
 
 def is_float(string: str):
     try:
@@ -89,10 +89,6 @@ def cut_paste_cell(file_path, last_row):
                 cell_new = row_excel_book[idx-1] + str(num)
                 sheet[cell_new] = sheet[cell_old].value
 
-        # g_cell = 'G' + str(num)
-        # r_cell = 'R' + str(num)
-        # sheet[g_cell] = sheet[r_cell].value
-        # sheet[r_cell] = ''
     sheet["G1"] = "dnipro.atlant-shop.com.ua opt"
     wb.save(file_path)
 
@@ -107,6 +103,7 @@ def cut_paste_atlant_shop(file_path, last_row):
         r_cell = 'R' + str(num)
         sheet[g_cell] = sheet[r_cell].value
         sheet[r_cell] = ''
+    sheet['Q1'].font = Font(bold=True)
     wb.save(file_path)
 
 
